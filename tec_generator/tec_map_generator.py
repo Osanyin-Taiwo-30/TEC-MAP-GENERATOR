@@ -13,6 +13,10 @@ import urllib2
 
 import getIONEX as ionex
 
+#######################################################
+# Downloading barely works, get your files from here! #
+# ftp://cddis.gsfc.nasa.gov/gps/products/ionex        #
+#######################################################
 
 def get_ionex_file(year, day_of_year):
     day_formatted = "%03d" % day_of_year
