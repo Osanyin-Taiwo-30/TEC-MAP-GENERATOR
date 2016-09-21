@@ -28,7 +28,7 @@ def get_ionex_file(year, day_of_year):
     ionex_file_path = IONEX_DATASTORE.format(year, )
 
     print IONEX_DATASTORE
-    req = urllib2.Request('ftp://cddis.gsfc.nasa.gov/gps/products/ionex/2005/157/igsg12570.05i.Z')
+    req = urllib2.Request(IONEX_DATASTORE)
     resp = urllib2.urlopen(req)
     with open(igsg_file_name_z, 'wb') as fp:
         fp.write(resp.read())
