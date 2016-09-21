@@ -353,16 +353,17 @@ def getIONEXfile(time="2012/03/23/02:20:10.01",server="ftp://ftp.unibe.ch/aiub/C
         except:
             print "cannot create output directory for IONEXdata",outpath
             return -1
-        try:
-          yy=time[2:4];
-          year=int(time[:4])
-          month=int(time[5:7])
-          day=int(time[8:10])
-        except:
-          year = time[0]
-          yy = year - 2000
-          month = time[1]
-          day = time[2]
+    try:
+      yy=time[2:4];
+      year=int(time[:4])
+      month=int(time[5:7])
+      day=int(time[8:10])
+    except:
+      year = time[0]
+      yy = year - 2000
+      month = time[1]
+      day = time[2]
+   
     dayofyear = date(year,month,day).timetuple().tm_yday;
     if prefix=='ROBR':
         filenames=[str(year)+"/%03d/"%(dayofyear)+prefix+"%03d"%(dayofyear)+str(hours_let)+"%02d"%minutes+".%sI.Z"%yy for hours_let in string.letters[:24] for minutes in range(0,60,15)]

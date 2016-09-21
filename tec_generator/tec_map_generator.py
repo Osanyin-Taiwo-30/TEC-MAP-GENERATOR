@@ -6,8 +6,35 @@ sys.path.append(RMEXTRACT_PATH)
 from scipy.interpolate import RegularGridInterpolator
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+import subprocess
+import time
+import urllib2
 
 import getIONEX as ionex
+
+
+def get_ionex_file(year, day_of_year):
+    day_formatted = "%03d" % day_of_year
+    year_formatted = str(year)[-2:]
+
+    igsg_file_name = "igsg{}0.{}i".format(day_formatted, year_formatted)
+    igsg_file_name_z = igsg_file_name + ".Z"
+    IONEX_DATASTORE = "ftp://cddis.gsfc.nasa.gov/gps/products/ionex/{}/{}/{}".format(year, day_formatted, igsg_file_name_z)
+    ionex_file_path = IONEX_DATASTORE.format(year, )
+
+    print IONEX_DATASTORE
+    req = urllib2.Request('ftp://cddis.gsfc.nasa.gov/gps/products/ionex/2005/157/igsg12570.05i.Z')
+    resp = urllib2.urlopen(req)
+    with open(igsg_file_name_z, 'wb') as fp:
+        fp.write(resp.read())
+
+    cmd = "uncompress {}".format(igsg_file_name_z)
+    p = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+    p.stdin.write('yes')
+    time.sleep(1)
+
+    return igsg_file_name
 
 def generate_tec_map(path_to_ionex, hour_in_day):
     """
