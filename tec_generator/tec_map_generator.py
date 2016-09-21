@@ -40,7 +40,7 @@ def get_ionex_file(year, day_of_year):
 
     return igsg_file_name
 
-def generate_tec_map(path_to_ionex, hour_in_day):
+def generate_tec_map(path_to_ionex, hour_in_day, lat_of_interest=None, lon_of_interest=None):
     """
     Function to generate tec maps!
     """
@@ -72,6 +72,15 @@ def generate_tec_map(path_to_ionex, hour_in_day):
     plt.title("TEC Map of {}".format(path_to_ionex))
     plt.ylabel("Latitude (degrees)")
     plt.yticks(range(len(lat_v))[::AXIS_STEP], lat_v[::AXIS_STEP]-90) # reverse the array so lats count down
+
+    if lat_of_interest is not None and lon_of_interest is not None:
+        lat_idx = int((lat_of_interest + 90) / LAT_STEP_SIZE)
+        lon_idx = int((lon_of_interest + 180) / LON_STEP_SIZE)  
+        # import pdb; pdb.set_trace()
+        plt.annotate('Lat {} Lon {} (aprox)'.format(lat_of_interest, lon_of_interest), xy=(lon_idx, lat_idx), xytext=(lon_idx-5, lat_idx-5),
+                arrowprops=dict(facecolor='white'),
+                )
+
 
     plt.xlabel("Longitude (degrees)")
     plt.xticks(range(len(lon_v))[::AXIS_STEP], lon_v[::AXIS_STEP]-180)
