@@ -18,6 +18,16 @@ import getIONEX as ionex
 # ftp://cddis.gsfc.nasa.gov/gps/products/ionex        #
 #######################################################
 
+
+LAT_STEP_SIZE = 2.5
+LON_STEP_SIZE = 5.0
+
+MAX_LAT = 180
+MIN_LAT = 0
+
+MAX_LON = 360
+MIN_LON = 0
+
 def get_ionex_file(year, day_of_year):
     day_formatted = "%03d" % day_of_year
     year_formatted = str(year)[-2:]
@@ -40,21 +50,18 @@ def get_ionex_file(year, day_of_year):
 
     return igsg_file_name
 
-def generate_tec_map(path_to_ionex, hour_in_day, lat_of_interest=None, lon_of_interest=None):
+def get_tec_for_lat_lon_idx(tecs, lat, lon, lat_step=LAT_STEP_SIZE, lon_step=LON_STEP_SIZE):
+    lat_idx = int((lat + 90) / lat_step)
+    lon_idx = int((lon + 180) / lon_step)
+    return lat_idx, lon_idx    
+
+def generate_tec_map(path_to_ionex, hour_in_day, lat_of_interest=0.0, lon_of_interest=0.0):
     """
     Function to generate tec maps!
     """
     tec_struct = ionex.readTEC(path_to_ionex) # some data struct is returned from the library.
     tec_data = tec_struct[0]
 
-    LAT_STEP_SIZE = 2.5
-    LON_STEP_SIZE = 5.0
-
-    MAX_LAT = 180
-    MIN_LAT = 0
-
-    MAX_LON = 360
-    MIN_LON = 0
 
     hours = np.arange(0, 25, 2) # 24 hours, 2 hour steps
     lat_v = np.arange(MIN_LAT + LAT_STEP_SIZE, MAX_LAT, LAT_STEP_SIZE) # Starts at 2.5 degrees (87.5)
@@ -66,28 +73,27 @@ def generate_tec_map(path_to_ionex, hour_in_day, lat_of_interest=None, lon_of_in
         for j, lon in enumerate(lon_v):
             tec = interpolator(np.array([hour_in_day, lat, lon]))
             tecs[i, j] = tec
+    
+    def plot_tec_map():
+        AXIS_STEP = 5
+        plt.figure(figsize=(36, 18))
+        plt.title("TEC Map of {} @ {} hours".format(path_to_ionex, hour_in_day))
+        plt.ylabel("Latitude (degrees)")
+        plt.yticks(range(len(lat_v))[::AXIS_STEP], lat_v[::AXIS_STEP]-90) # reverse the array so lats count down
 
-    AXIS_STEP = 5
-    plt.figure(figsize=(36, 18))
-    plt.title("TEC Map of {}".format(path_to_ionex))
-    plt.ylabel("Latitude (degrees)")
-    plt.yticks(range(len(lat_v))[::AXIS_STEP], lat_v[::AXIS_STEP]-90) # reverse the array so lats count down
-
-    if lat_of_interest is not None and lon_of_interest is not None:
-        lat_idx = int((lat_of_interest + 90) / LAT_STEP_SIZE)
-        lon_idx = int((lon_of_interest + 180) / LON_STEP_SIZE)  
-        # import pdb; pdb.set_trace()
+        lat_idx, lon_idx = get_tec_for_lat_lon_idx(tecs, lat_of_interest, lon_of_interest)
         plt.annotate('Lat {} Lon {} (aprox)'.format(lat_of_interest, lon_of_interest), xy=(lon_idx, lat_idx), xytext=(lon_idx-5, lat_idx-5),
                 arrowprops=dict(facecolor='white'),
-                )
+        )
 
 
-    plt.xlabel("Longitude (degrees)")
-    plt.xticks(range(len(lon_v))[::AXIS_STEP], lon_v[::AXIS_STEP]-180)
+        plt.xlabel("Longitude (degrees)")
+        plt.xticks(range(len(lon_v))[::AXIS_STEP], lon_v[::AXIS_STEP]-180)
 
-    heatmap = plt.pcolor(tecs)
-    plt.colorbar()
-    plt.show()
-    
+        heatmap = plt.pcolor(tecs)
+        plt.colorbar()
+
+    plot_tec_map()
     return tecs
+
 
