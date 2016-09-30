@@ -1,8 +1,3 @@
-# Add RMExtract to Python path
-import sys
-RMEXTRACT_PATH = '../RMextract' # dependent on this file being in this folder.
-sys.path.append(RMEXTRACT_PATH)
-
 from scipy.interpolate import RegularGridInterpolator
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,13 +6,7 @@ import subprocess
 import time
 import urllib2
 
-import getIONEX as ionex
-
-#######################################################
-# Downloading barely works, get your files from here! #
-# ftp://cddis.gsfc.nasa.gov/gps/products/ionex        #
-#######################################################
-
+from RMextract import getIONEX as ionex
 
 LAT_STEP_SIZE = 2.5
 LON_STEP_SIZE = 5.0
@@ -96,4 +85,18 @@ def generate_tec_map(path_to_ionex, hour_in_day, lat_of_interest=0.0, lon_of_int
     plot_tec_map()
     return tecs
 
-
+def plot_map_location_on_tec_map(year, day_in_year, hour_in_day, lat_of_interest, lon_of_interest):
+    """
+    Generates a map plot of the lat long specified, plotted on a heat map. 
+    :param year: year for tec map
+    :param day_in_year: day in the year (e.g. January 6th = 6, Febuary 1st = 32 (i think))
+    :param hour_in_day: the hour of the tec map. Note this value is interpolated between 2 hour samples.
+    :param lat_of_interest: the latitude you are interested in (-90 <= lat_of_interest <= 90 in degrees)
+    :param lon_of_interest: the longitude you are interested in (-180 <= lat_of_interest <= 180 in degrees)
+    :returns tec_value: the value of tec at that time, at that location.
+    """
+    ionex_file = get_ionex_file(year, day_in_year)
+    tecs = generate_tec_map(ionex_file, hour_in_day=hour_in_day, lat_of_interest=lat_of_interest, lon_of_interest=lon_of_interest)
+    lat_idx, lon_idx = get_tec_for_lat_lon_idx(tecs, lat_of_interest, lon_of_interest)
+    tec_value = tecs[lat_idx][lon_idx]
+    return tec_value 
