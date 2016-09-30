@@ -44,13 +44,23 @@ def get_tec_for_lat_lon_idx(tecs, lat, lon, lat_step=LAT_STEP_SIZE, lon_step=LON
     lon_idx = int((lon + 180) / lon_step)
     return lat_idx, lon_idx    
 
-def generate_tec_map(path_to_ionex, hour_in_day, lat_of_interest=0.0, lon_of_interest=0.0):
+def generate_tec_map(year, day_of_year, hour_in_day, lat_of_interest=0.0, lon_of_interest=0.0, plot=True):
     """
-    Function to generate tec maps!
+    Generates a tec map for a specific time. The returned array is sampled every 2.5 degrees in latitude and every
+    5.0 degrees in longitude, as given in the IONEX files. 
+
+    
+    :param year: year for tec map
+    :param day_in_year: day in the year (e.g. January 6th = 6, Febuary 1st = 32 (i think))
+    :param hour_in_day: the hour of the tec map. Note this value is interpolated between 2 hour samples.
+    :param lat_of_interest: the latitude you are interested in (-90 <= lat_of_interest <= 90 in degrees)
+    :param lon_of_interest: the longitude you are interested in (-180 <= lat_of_interest <= 180 in degrees)
+    :returns tec_value, tec_map: tuple of the actual TEC at a given lat long, and a numpy array of sampled TEC values.
     """
+    path_to_ionex = get_ionex_file(year, day_of_year)
+
     tec_struct = ionex.readTEC(path_to_ionex) # some data struct is returned from the library.
     tec_data = tec_struct[0]
-
 
     hours = np.arange(0, 25, 2) # 24 hours, 2 hour steps
     lat_v = np.arange(MIN_LAT + LAT_STEP_SIZE, MAX_LAT, LAT_STEP_SIZE) # Starts at 2.5 degrees (87.5)
@@ -81,22 +91,9 @@ def generate_tec_map(path_to_ionex, hour_in_day, lat_of_interest=0.0, lon_of_int
 
         heatmap = plt.pcolor(tecs)
         plt.colorbar()
-
-    plot_tec_map()
-    return tecs
-
-def plot_map_location_on_tec_map(year, day_in_year, hour_in_day, lat_of_interest, lon_of_interest):
-    """
-    Generates a map plot of the lat long specified, plotted on a heat map. 
-    :param year: year for tec map
-    :param day_in_year: day in the year (e.g. January 6th = 6, Febuary 1st = 32 (i think))
-    :param hour_in_day: the hour of the tec map. Note this value is interpolated between 2 hour samples.
-    :param lat_of_interest: the latitude you are interested in (-90 <= lat_of_interest <= 90 in degrees)
-    :param lon_of_interest: the longitude you are interested in (-180 <= lat_of_interest <= 180 in degrees)
-    :returns tec_value: the value of tec at that time, at that location.
-    """
-    ionex_file = get_ionex_file(year, day_in_year)
-    tecs = generate_tec_map(ionex_file, hour_in_day=hour_in_day, lat_of_interest=lat_of_interest, lon_of_interest=lon_of_interest)
-    lat_idx, lon_idx = get_tec_for_lat_lon_idx(tecs, lat_of_interest, lon_of_interest)
-    tec_value = tecs[lat_idx][lon_idx]
-    return tec_value 
+    
+    if plot:
+        plot_tec_map()
+    
+    tec_value = get_tec_for_lat_lon_idx(tecs, lat_of_interest, lon_of_interest)
+    return tec_value, tecs
