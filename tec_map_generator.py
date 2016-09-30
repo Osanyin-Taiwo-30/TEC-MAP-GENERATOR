@@ -26,7 +26,7 @@ def get_ionex_file(year, day_of_year):
     IONEX_DATASTORE = "ftp://cddis.gsfc.nasa.gov/gps/products/ionex/{}/{}/{}".format(year, day_formatted, igsg_file_name_z)
     ionex_file_path = IONEX_DATASTORE.format(year, )
 
-    print IONEX_DATASTORE
+    print(IONEX_DATASTORE)
     req = urllib2.Request(IONEX_DATASTORE)
     resp = urllib2.urlopen(req)
     with open(igsg_file_name_z, 'wb') as fp:
@@ -94,9 +94,9 @@ def generate_tec_map(year, day_of_year, hour_in_day, lat_of_interest=0.0, lon_of
     
     if plot:
         plot_tec_map()
-        print "Run matplotlib.pyplot.show() to see the TEC map!"
+        print("Run matplotlib.pyplot.show() to see the TEC map!")
     
     lat, lon = get_tec_for_lat_lon_idx(tecs, lat_of_interest, lon_of_interest)
     tec_value = tecs[lat][lon]
-    print "TEC Value ~= {}".format(tec_value)
+    print("TEC Value ~= {}".format(tec_value))
     return tec_value, tecs
